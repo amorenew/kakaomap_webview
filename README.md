@@ -444,4 +444,4 @@ Sample code
                   );
     ```
 
-![kakaomap](https://raw.githubusercontent.com/amorenew/kakaomap_webview/main/sample.webp | width=100)
+<img src="https://raw.githubusercontent.com/amorenew/kakaomap_webview/main/sample.webp" width="300" />
