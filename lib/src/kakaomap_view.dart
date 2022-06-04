@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:kakaomap_webview/src/kakao_figure.dart';
+import 'package:kakaomap_webview/src/kakao_html.dart';
 import 'package:kakaomap_webview/src/kakaomap_type.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -33,6 +34,12 @@ class KakaoMapView extends StatelessWidget {
 
   /// Set marker image. If it's null, default marker will be showing
   final String markerImageURL;
+
+  /// Set marker image width.
+  final double markerImageWidth;
+
+  /// Set marker image height.
+  final double markerImageHeight;
 
   /// TRAFFIC, ROADVIEW, TERRAIN, USE_DISTRICT, BICYCLE are supported.
   /// If null, type is default
@@ -106,6 +113,8 @@ class KakaoMapView extends StatelessWidget {
       this.cameraIdle,
       this.boundaryUpdate,
       this.markerImageURL = '',
+      this.markerImageWidth = 64,
+      this.markerImageHeight = 69,
       this.customScript,
       this.mapWidgetKey,
       this.draggableMarker = false,
@@ -161,39 +170,27 @@ class KakaoMapView extends StatelessWidget {
   }
 
   String _getHTML() {
-    String markerImageOption = '';
-    String overlayStyle = '';
+    final kakaoHtml = KakaoHtml();
+    final overlayStyle = kakaoHtml.getOverlayStyle(
+      overlayText: overlayText,
+      customOverlayStyle: customOverlayStyle,
+    );
+    final marker = kakaoHtml.addMarker(
+      markerImageUrl: markerImageURL,
+      lat: lat,
+      lng: lng,
+    );
 
-    if (markerImageURL.isNotEmpty) {
-      markerImageOption = 'image: markerImage';
-    }
-
-    if (overlayText != null) {
-      if (customOverlayStyle == null) {
-        overlayStyle = '''
-<style>
-  .label {margin-bottom: 96px;}
-  .label * {display: inline-block;vertical-align: top;}
-  .label .left {background: url("https://t1.daumcdn.net/localimg/localimages/07/2011/map/storeview/tip_l.png") no-repeat;display: inline-block;height: 24px;overflow: hidden;vertical-align: top;width: 7px;}
-  .label .center {background: url(https://t1.daumcdn.net/localimg/localimages/07/2011/map/storeview/tip_bg.png) repeat-x;display: inline-block;height: 24px;font-size: 12px;line-height: 24px;}
-  .label .right {background: url("https://t1.daumcdn.net/localimg/localimages/07/2011/map/storeview/tip_r.png") -1px 0  no-repeat;display: inline-block;height: 24px;overflow: hidden;width: 6px;}
-</style>
-      ''';
-      } else {
-        overlayStyle = customOverlayStyle ?? '';
-      }
-    } else {
-      overlayStyle = customOverlayStyle ?? '';
-    }
-
-    return Uri.dataFromString('''
+    return Uri.dataFromString(
+      '''
 <html>
 <head>
   <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=yes\'>
-  <script type="text/javascript" src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=true&appkey=$kakaoMapKey'></script>
 $overlayStyle
 </head>
 <body style="padding:0; margin:0;">
+  <script type="text/javascript" src='https://dapi.kakao.com/v2/maps/sdk.js?autoload=true&appkey=$kakaoMapKey'></script>
+
 	<div id='map' style="width:100%;height:100%;min-width:${width}px;min-height:${height}px;"/>
 	<script>
 		const container = document.getElementById('map');
@@ -202,26 +199,11 @@ $overlayStyle
 			center: new kakao.maps.LatLng($lat, $lng),
 			level: $zoomLevel
 		};
+    var markers = [];
 
 		const map = new kakao.maps.Map(container, options);
-		
-		let markerImage
-		
-		if(${markerImageURL.isNotEmpty}){
-		  let imageSrc = '$markerImageURL'
-		  let imageSize = new kakao.maps.Size(64, 69)
-		  let imageOption = {offset: new kakao.maps.Point(27, 69)}
-		  markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption)
-		}
-		const markerPosition  = new kakao.maps.LatLng($lat, $lng);
-		
-		const marker = new kakao.maps.Marker({
-      position: markerPosition,
-      $markerImageOption
-    });
-    
-    marker.setMap(map);
-    
+		 $marker
+
     if(${overlayText != null}){
       const content = '<div class ="label"><span class="left"></span><span class="center">$overlayText</span><span class="right"></span></div>';
   
@@ -297,7 +279,7 @@ $overlayStyle
     }
     
     if(${mapType != null}){
-      const changeMapType = ${mapType!.getType};
+      const changeMapType = ${mapType?.getType};
       
       map.addOverlayMapTypeId(changeMapType);
     }
@@ -307,35 +289,38 @@ $overlayStyle
     if(${polygon != null}){
       const polygon = new kakao.maps.Polygon({
 	      map: map,
-        path: [${polygon!.getPath}],
-        strokeWeight: ${polygon!.strokeWeight},
-        strokeColor: ${polygon!.getStrokeColor},
-        strokeOpacity: ${polygon!.strokeColorOpacity},
-        strokeStyle: '${polygon!.strokeStyle.name}',
-        fillColor: ${polygon!.getPolygonColor},
-        fillOpacity: ${polygon!.polygonColorOpacity} 
+        path: [${polygon?.getPath}],
+        strokeWeight: ${polygon?.strokeWeight},
+        strokeColor: ${polygon?.getStrokeColor},
+        strokeOpacity: ${polygon?.strokeColorOpacity},
+        strokeStyle: '${polygon?.strokeStyle.name}',
+        fillColor: ${polygon?.getPolygonColor},
+        fillOpacity: ${polygon?.polygonColorOpacity} 
       });
     }
     
     if(${polyline != null}){
       const polyline = new kakao.maps.Polyline({
         map: map,
-        path: [${polyline!.getPath}],
-        strokeWeight: ${polyline!.strokeWeight},
-        strokeColor: ${polyline!.getStrokeColor},
-        strokeOpacity: ${polyline!.strokeColorOpacity},
-        strokeStyle: '${polyline!.strokeStyle.name}'
+        path: [${polyline?.getPath}],
+        strokeWeight: ${polyline?.strokeWeight},
+        strokeColor: ${polyline?.getStrokeColor},
+        strokeOpacity: ${polyline?.strokeColorOpacity},
+        strokeStyle: '${polyline?.strokeStyle.name}'
       });
     }
 	</script>
 </body>
 </html>
-    ''', mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
-        .toString();
+    ''',
+      mimeType: 'text/html',
+      encoding: utf8,
+    ).toString();
   }
 
   String _customScriptHTML() {
-    return Uri.dataFromString('''
+    return Uri.dataFromString(
+      '''
 <html>
 <head>
   <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=yes\'>
@@ -357,7 +342,9 @@ $overlayStyle
 	</script>
 </body>
 </html>
-    ''', mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
-        .toString();
+    ''',
+      mimeType: 'text/html',
+      encoding: utf8,
+    ).toString();
   }
 }

@@ -7,3 +7,5 @@ export 'src/kakaomap_type.dart';
 export 'src/kakao_latlng.dart';
 export 'src/kakao_figure.dart';
 export 'src/kakao_boundary.dart';
+export 'src/kakao_html.dart';
+export 'src/kakao_controller.dart';
