@@ -408,3 +408,40 @@ Sample code
 ```
 
 - **Kakao Controller**
+  
+  To controller your map you need to define a controller by:
+
+    ```
+     late WebViewController _mapController;
+
+     KakaoMapView(mapController: (controller) =>
+                   _mapController = controller)
+    ```
+
+   ##### Add marker
+    ```
+        _mapController.addMarker(
+                    markerImageUrl: markerImageUrl,
+                    lat: _lat,
+                    lng: _lng,
+                    markerWidth: 64,
+                    markerHeight: 69,
+                  );
+    ```
+  
+  ##### Remove marker
+    ```
+        _mapController.removeMarker(
+                    lat: lat,
+                    lng: lng,
+                  );
+    ```
+  ##### Move to marker/position
+    ```
+        _mapController.moveTo(
+                    lat: _lat + 0.0003,
+                    lng: _lng + 0.0035,
+                  );
+    ```
+
+![kakaomap](https://raw.githubusercontent.com/amorenew/kakaomap_webview/main/sample.webp | width=100)
