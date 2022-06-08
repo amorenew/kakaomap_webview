@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:example/basic_example.dart';
 import 'package:example/kakaomap_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:kakaomap_webview/kakaomap_webview.dart';
@@ -226,11 +227,23 @@ const customOverlay = new kakao.maps.CustomOverlay({
               )
             ],
           ),
-          ElevatedButton(
-              child: Text('Kakao map screen'),
-              onPressed: () async {
-                await _openKakaoMapScreen(context);
-              })
+          Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                  child: Text('Basic Example screen'),
+                  onPressed: () async {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => BasicExample()),
+                    );
+                  }),
+              ElevatedButton(
+                  child: Text('Kakao map screen'),
+                  onPressed: () async {
+                    await _openKakaoMapScreen(context);
+                  }),
+            ],
+          )
         ],
       ),
     );

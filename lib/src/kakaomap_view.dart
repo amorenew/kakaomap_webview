@@ -118,7 +118,7 @@ class KakaoMapView extends StatelessWidget {
       this.customScript,
       this.mapWidgetKey,
       this.draggableMarker = false,
-      this.mapType,
+      this.mapType = MapType.BICYCLE,
       this.mapController});
 
   @override
